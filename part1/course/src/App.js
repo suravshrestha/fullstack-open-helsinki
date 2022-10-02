@@ -1,5 +1,17 @@
 import { useState } from "react";
 
+const History = ({ allClicks }) => {
+  if (allClicks.length === 0) {
+    return <div>the app is used by pressing the buttons</div>;
+  }
+
+  return <div>button press history: {allClicks.join(" ")}</div>;
+};
+
+const Button = ({ handleClick, text }) => (
+  <button onClick={handleClick}>{text}</button>
+);
+
 const App = () => {
   // allClicks is assigned the initial value of state which is empty array []
   // setAll is assigned to a function that will be used to modify the state
@@ -21,11 +33,11 @@ const App = () => {
   return (
     <div>
       {left}
-      <button onClick={handleLeftClick}>left</button>
-      <button onClick={handleRightClick}>right</button>
+      <Button handleClick={handleLeftClick} text="left" />
+      <Button handleClick={handleRightClick} text="right" />
       {right}
 
-      <p>{allClicks.join(" ")}</p>
+      <History allClicks={allClicks} />
     </div>
   );
 };
