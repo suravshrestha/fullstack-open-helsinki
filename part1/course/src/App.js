@@ -1,23 +1,31 @@
 import { useState } from "react";
 
 const App = () => {
-  // clicks is assigned the initial value of state which is the object { left: 0, right: 0 }
-  // setClicks is assigned to a function that will be used to modify the state
-  const [clicks, setClicks] = useState({ left: 0, right: 0 });
+  // allClicks is assigned the initial value of state which is empty array []
+  // setAll is assigned to a function that will be used to modify the state
+  const [allClicks, setAll] = useState([]);
 
-  const handleLeftClick = () => setClicks({ ...clicks, left: clicks.left + 1 });
+  const [left, setLeft] = useState(0);
+  const [right, setRight] = useState(0);
 
-  const handleRightClick = () =>
-    setClicks({ ...clicks, right: clicks.right + 1 });
+  const handleLeftClick = () => {
+    setAll(allClicks.concat("L"));
+    setLeft(left + 1);
+  };
+
+  const handleRightClick = () => {
+    setAll(allClicks.concat("R"));
+    setRight(right + 1);
+  };
 
   return (
     <div>
-      {clicks.left}
-
+      {left}
       <button onClick={handleLeftClick}>left</button>
       <button onClick={handleRightClick}>right</button>
+      {right}
 
-      {clicks.right}
+      <p>{allClicks.join(" ")}</p>
     </div>
   );
 };
