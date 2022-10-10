@@ -4,57 +4,39 @@ const app = express();
 const morgan = require("morgan");
 const cors = require("cors");
 
-app.use(express.json());
-app.use(morgan("tiny"));
-
-app.use(cors());
+const Note = require("./models/note");
 
 app.use(express.static("build"));
+app.use(express.json());
 
-let notes = [
-  {
-    id: 1,
-    content: "HTML is easy",
-    date: "2022-05-30T17:30:31.098Z",
-    important: true,
-  },
-  {
-    id: 2,
-    content: "Browser can execute only Javascript",
-    date: "2022-05-30T18:39:34.091Z",
-    important: false,
-  },
-  {
-    id: 3,
-    content: "GET and POST are the most important methods of HTTP protocol",
-    date: "2022-05-30T19:20:14.298Z",
-    important: true,
-  },
-];
+app.use(morgan("tiny"));
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("<h1>Hello, world!</h1>");
 });
 
 app.get("/api/notes", (req, res) => {
-  res.json(notes);
+  Note.find({}).then((notes) => {
+    res.json(notes);
+  });
 });
 
-app.get("/api/notes/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const note = notes.find((note) => note.id === id);
+app.get("/api/notes/:id", (req, res, next) => {
+  Note.findById(req.params.id)
+    .then((note) => {
+      if (note) {
+        return res.json(note);
+      }
 
-  if (note) {
-    return res.json(note);
-  }
-
-  res.status(404).end();
+      res.status(404).end();
+    })
+    .catch((err) => {
+      // If the next function is called with a parameter, then the
+      // execution will continue to the error handler middleware.
+      next(err);
+    });
 });
-
-const generateId = () => {
-  const maxId = notes.length > 0 ? Math.max(...notes.map((n) => n.id)) : 0;
-  return maxId + 1;
-};
 
 app.post("/api/notes", (req, res) => {
   const body = req.body;
@@ -65,30 +47,56 @@ app.post("/api/notes", (req, res) => {
     });
   }
 
-  const note = {
+  console.log(body.important);
+
+  const note = new Note({
     content: body.content,
     important: body.important || false,
     date: new Date(),
-    id: generateId(),
-  };
+  });
 
-  notes = notes.concat(note);
-
-  res.json(note);
+  note.save().then((savedNote) => {
+    res.json(savedNote);
+  });
 });
 
-app.delete("/api/notes/:id", (req, res) => {
-  const id = Number(req.params.id);
-  notes = notes.filter((note) => note.id !== id);
+app.put("/api/notes/:id", (req, res, next) => {
+  Note.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    .then((updatedNote) => {
+      // The optional parameter { new : true } gets the updated note
+      res.json(updatedNote);
+    })
+    .catch((error) => next(error));
+});
 
-  res.status(204).end();
+app.delete("/api/notes/:id", (req, res, next) => {
+  Note.findByIdAndRemove(req.params.id)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((err) => next(err));
 });
 
 const unknownEndpoint = (req, res) => {
   res.status(404).send({ error: "unknown endpoint" });
 };
 
+// handler of requests with unknown endpoint
 app.use(unknownEndpoint);
+
+const errorHandler = (err, req, res, next) => {
+  console.error(err.message);
+
+  if (err.name === "CastError") {
+    return res.status(400).send({ error: "malformatted id" });
+  }
+
+  next(err);
+};
+
+// handler of requests with result to errors
+// this has to be the last loaded middleware.
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
