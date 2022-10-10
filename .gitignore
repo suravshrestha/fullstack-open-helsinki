@@ -158,3 +158,9 @@ sketch
 
 # REST Client
 *.rest
+
+# Fly.io
+*.toml
+
+# React
+build
