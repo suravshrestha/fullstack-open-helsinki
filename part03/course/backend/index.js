@@ -38,7 +38,7 @@ app.get("/api/notes/:id", (req, res, next) => {
     });
 });
 
-app.post("/api/notes", (req, res) => {
+app.post("/api/notes", (req, res, next) => {
   const body = req.body;
 
   if (!body.content) {
@@ -47,21 +47,30 @@ app.post("/api/notes", (req, res) => {
     });
   }
 
-  console.log(body.important);
-
   const note = new Note({
     content: body.content,
     important: body.important || false,
     date: new Date(),
   });
 
-  note.save().then((savedNote) => {
-    res.json(savedNote);
-  });
+  note
+    .save()
+    .then((savedNote) => {
+      res.json(savedNote);
+    })
+    .catch((err) => next(err));
 });
 
 app.put("/api/notes/:id", (req, res, next) => {
-  Note.findByIdAndUpdate(req.params.id, req.body, { new: true })
+  Note.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    
+    // By default, validations are not run when findByIdAndUpdate is executed
+    runValidators: true,
+
+    // For technical reasons, context option must be set to "query"
+    context: "query",
+  })
     .then((updatedNote) => {
       // The optional parameter { new : true } gets the updated note
       res.json(updatedNote);
@@ -89,6 +98,8 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === "CastError") {
     return res.status(400).send({ error: "malformatted id" });
+  } else if (err.name === "ValidationError") {
+    return res.status(400).json({ error: err.message });
   }
 
   next(err);
