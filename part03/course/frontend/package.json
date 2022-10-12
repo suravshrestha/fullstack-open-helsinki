@@ -16,8 +16,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "server": "json-server -p3001 --watch db.json"
+    "eject": "react-scripts eject"
   },
   "proxy": "http://localhost:3001",
   "eslintConfig": {
@@ -40,5 +39,9 @@
   },
   "resolutions": {
     "mini-css-extract-plugin": "2.4.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.25.0",
+    "eslint-plugin-react": "^7.31.10"
   }
 }
