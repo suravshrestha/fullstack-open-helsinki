@@ -64,7 +64,7 @@ app.post("/api/notes", (req, res, next) => {
 app.put("/api/notes/:id", (req, res, next) => {
   Note.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-    
+
     // By default, validations are not run when findByIdAndUpdate is executed
     runValidators: true,
 
@@ -80,7 +80,7 @@ app.put("/api/notes/:id", (req, res, next) => {
 
 app.delete("/api/notes/:id", (req, res, next) => {
   Note.findByIdAndRemove(req.params.id)
-    .then((result) => {
+    .then(() => {
       res.status(204).end();
     })
     .catch((err) => next(err));

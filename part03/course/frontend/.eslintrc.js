@@ -2,6 +2,7 @@ module.exports = {
   env: {
     browser: true,
     es2021: true,
+    node: true, // for 'module' is not defined. (no-undef)
   },
   extends: ["eslint:recommended", "plugin:react/recommended"],
   overrides: [],
@@ -12,8 +13,12 @@ module.exports = {
   plugins: ["react"],
   rules: {
     indent: ["error", 2],
-    "linebreak-style": ["error", "windows"],
     quotes: ["error", "double"],
     semi: ["error", "always"],
+  },
+  settings: {
+    react: {
+      version: "detect",
+    },
   },
 };

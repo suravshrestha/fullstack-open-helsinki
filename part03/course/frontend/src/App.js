@@ -1,3 +1,6 @@
+import React from "react";
+import PropTypes from "prop-types";
+
 import { useState, useEffect } from "react";
 
 import Note from "./components/Note";
@@ -7,6 +10,10 @@ const Notification = ({ message }) => {
   if (message) {
     return <div className="error">{message}</div>;
   }
+};
+
+Notification.propTypes = {
+  message: PropTypes.string.isRequired,
 };
 
 const Footer = () => {
@@ -70,7 +77,7 @@ const App = () => {
       .then((returnedNote) => {
         setNotes(notes.map((note) => (note.id === id ? returnedNote : note)));
       })
-      .catch((error) => {
+      .catch(() => {
         setErrorMessage(
           `Note '${note.content}' was already removed from server`
         );
