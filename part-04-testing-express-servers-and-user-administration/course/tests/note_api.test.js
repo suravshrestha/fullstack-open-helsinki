@@ -1,5 +1,6 @@
-const mongoose = require("mongoose");
 const supertest = require("supertest");
+const mongoose = require("mongoose");
+const helper = require("./test_helper");
 const app = require("../app");
 
 // superagent object
@@ -7,26 +8,13 @@ const api = supertest(app);
 
 const Note = require("../models/note");
 
-const initialNotes = [
-  {
-    content: "HTML is easy",
-    date: new Date(),
-    important: false,
-  },
-  {
-    content: "Browser can execute only Javascript",
-    date: new Date(),
-    important: true,
-  },
-];
-
 beforeEach(async () => {
   await Note.deleteMany({});
 
-  let noteObject = new Note(initialNotes[0]);
+  let noteObject = new Note(helper.initialNotes[0]);
   await noteObject.save();
 
-  noteObject = new Note(initialNotes[1]);
+  noteObject = new Note(helper.initialNotes[1]);
   await noteObject.save();
 });
 
@@ -42,7 +30,7 @@ test("all notes are returned", async () => {
 
   // execution gets here only after the HTTP request is complete
   // the result of HTTP request is saved in variable response
-  expect(response.body).toHaveLength(initialNotes.length);
+  expect(response.body).toHaveLength(helper.initialNotes.length);
 });
 
 test("the first note is about HTTP methods", async () => {
