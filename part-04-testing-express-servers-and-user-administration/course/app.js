@@ -37,5 +37,8 @@ app.get("/", (req, res) => {
 // Register the routers
 app.use("/api/notes", notesRouter);
 
+// handler of requests with result to errors
+// this has to be the last loaded middleware
+app.use(middleware.errorHandler);
 
 module.exports = app;
