@@ -7,23 +7,17 @@ notesRouter.get("/", async (req, res) => {
   res.json(notes);
 });
 
-notesRouter.get("/:id", async (req, res, next) => {
-  try {
-    const note = await Note.findById(req.params.id);
+notesRouter.get("/:id", async (req, res) => {
+  const note = await Note.findById(req.params.id);
 
-    if (note) {
-      return res.json(note);
-    }
-
-    res.status(404).end();
-  } catch (err) {
-    // If the next function is called with a parameter, then the
-    // execution will continue to the error handler middleware.
-    next(err);
+  if (note) {
+    return res.json(note);
   }
+
+  res.status(404).end();
 });
 
-notesRouter.post("/", async (req, res, next) => {
+notesRouter.post("/", async (req, res) => {
   const body = req.body;
 
   const note = new Note({
@@ -32,13 +26,9 @@ notesRouter.post("/", async (req, res, next) => {
     date: new Date(),
   });
 
-  try {
-    const savedNote = await note.save();
+  const savedNote = await note.save();
 
-    res.status(201).json(savedNote);
-  } catch (err) {
-    next(err);
-  }
+  res.status(201).json(savedNote);
 });
 
 notesRouter.put("/:id", (req, res, next) => {
@@ -58,14 +48,10 @@ notesRouter.put("/:id", (req, res, next) => {
     .catch((error) => next(error));
 });
 
-notesRouter.delete("/:id", async (req, res, next) => {
-  try {
-    await Note.findByIdAndRemove(req.params.id);
+notesRouter.delete("/:id", async (req, res) => {
+  await Note.findByIdAndRemove(req.params.id);
 
-    res.status(204).end();
-  } catch (err) {
-    next(err);
-  }
+  res.status(204).end();
 });
 
 module.exports = notesRouter;
