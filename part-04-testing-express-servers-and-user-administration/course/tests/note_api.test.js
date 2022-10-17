@@ -11,11 +11,19 @@ const Note = require("../models/note");
 beforeEach(async () => {
   await Note.deleteMany({});
 
-  let noteObject = new Note(helper.initialNotes[0]);
-  await noteObject.save();
+  // Array of Mongoose objects
+  const noteObjects = helper.initialNotes.map((note) => new Note(note));
 
-  noteObject = new Note(helper.initialNotes[1]);
-  await noteObject.save();
+  // Array of promies for saving each note to the database
+  const promiseArray = noteObjects.map((note) => note.save());
+
+  // The Promise.all method can be used for transforming an array of promises into a single promise,
+  // that will be fulfilled once every promise in the array passed to it as a parameter is resolved.
+
+  // Promise.all executes the promises it receives in parallel
+  await Promise.all(promiseArray); // Wait until every promise for saving a note is finsihed
+
+  // Database has been initialized
 });
 
 test("notes are returned as json", async () => {
