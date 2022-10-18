@@ -7,6 +7,7 @@ const app = express();
 
 const cors = require("cors");
 const notesRouter = require("./controllers/notes");
+const usersRouter = require("./controllers/users");
 
 const middleware = require("./utils/middleware");
 const logger = require("./utils/logger");
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
 
 // Register the routers
 app.use("/api/notes", notesRouter);
+app.use("/api/users", usersRouter);
 
 // handler of requests with result to errors
 // this has to be the last loaded middleware
