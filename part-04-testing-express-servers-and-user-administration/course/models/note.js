@@ -13,6 +13,8 @@ const noteSchema = new mongoose.Schema({
   important: Boolean,
 });
 
+// .toJSON method is called everytime res.send is called
+// id is sent in response but no changed in the db
 noteSchema.set("toJSON", {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();

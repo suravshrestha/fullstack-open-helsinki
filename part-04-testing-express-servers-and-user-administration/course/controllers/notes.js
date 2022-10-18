@@ -49,9 +49,13 @@ notesRouter.put("/:id", (req, res, next) => {
 });
 
 notesRouter.delete("/:id", async (req, res) => {
-  await Note.findByIdAndRemove(req.params.id);
+  const note = await Note.findOneAndDelete({ _id: req.params.id });
 
-  res.status(204).end();
+  if (note) {
+    return res.status(204).end();
+  }
+
+  res.status(404).end();
 });
 
 module.exports = notesRouter;
