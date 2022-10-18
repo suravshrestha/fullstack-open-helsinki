@@ -11,6 +11,10 @@ const noteSchema = new mongoose.Schema({
     required: true,
   },
   important: Boolean,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 // .toJSON method is called everytime res.send is called
