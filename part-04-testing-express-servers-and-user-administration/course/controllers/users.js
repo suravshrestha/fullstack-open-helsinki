@@ -27,7 +27,13 @@ usersRouter.post("/", async (req, res) => {
 });
 
 usersRouter.get("/", async (req, res) => {
-  const users = await User.find({});
+  // populate: Mongoose's join query
+  const users = await User.find({}).populate("notes", {
+    // Send only "content" and "date" (including note "id")
+    content: 1,
+    date: 1,
+  });
+
   res.json(users);
 });
 
