@@ -136,6 +136,8 @@ const App = () => {
         password,
       });
 
+      noteService.setToken(user.token);
+
       setUser(user);
       setUsername("");
       setPassword("");
