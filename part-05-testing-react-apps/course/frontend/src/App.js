@@ -4,9 +4,11 @@ import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 
 import Note from "./components/Note";
+import NoteForm from "./components/NoteForm";
 import noteService from "./services/notes";
 
 import LoginForm from "./components/LoginForm";
+import Togglable from "./components/Togglable";
 
 import loginService from "./services/login";
 
@@ -47,7 +49,6 @@ const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
-  const [loginVisible, setLoginVisible] = useState(false);
 
   // Empty array is passed to run the effect only once
   useEffect(() => {
@@ -100,43 +101,11 @@ const App = () => {
         setErrorMessage(
           `Note '${note.content}' was already removed from server`
         );
-        setTimeout(() => {
-          setErrorMessage(null);
-        }, 5000);
+        setTimeout(() => setErrorMessage(null), 5000);
 
         setNotes(notes.filter((n) => n.id !== id));
       });
   };
-
-  const loginForm = () => {
-    const hideWhenVisible = { display: loginVisible ? "none" : "" };
-    const showWhenVisible = { display: loginVisible ? "" : "none" };
-
-    return (
-      <div>
-        <div style={hideWhenVisible}>
-          <button onClick={() => setLoginVisible(true)}>log in</button>
-        </div>
-        <div style={showWhenVisible}>
-          <LoginForm
-            username={username}
-            password={password}
-            handleUsernameChange={({ target }) => setUsername(target.value)}
-            handlePasswordChange={({ target }) => setPassword(target.value)}
-            handleSubmit={handleLogin}
-          />
-          <button onClick={() => setLoginVisible(false)}>cancel</button>
-        </div>
-      </div>
-    );
-  };
-
-  const noteForm = () => (
-    <form onSubmit={addNote}>
-      <input value={newNote} onChange={handleNoteChange} />
-      <button type="submit">save</button>
-    </form>
-  );
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -156,9 +125,7 @@ const App = () => {
       setPassword("");
     } catch (exception) {
       setErrorMessage("wrong credentials");
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 5000);
+      setTimeout(() => setErrorMessage(null), 5000);
     }
   };
 
@@ -171,10 +138,24 @@ const App = () => {
       {user ? (
         <div>
           <p>{user.name ? user.name : "Unknown user"} logged in</p>
-          {noteForm()}
+          <Togglable buttonLabel="new note">
+            <NoteForm
+              onSubmit={addNote}
+              value={newNote}
+              handleChange={handleNoteChange}
+            />
+          </Togglable>
         </div>
       ) : (
-        loginForm()
+        <Togglable buttonLabel="login">
+          <LoginForm
+            username={username}
+            password={password}
+            handleUsernameChange={({ target }) => setUsername(target.value)}
+            handlePasswordChange={({ target }) => setPassword(target.value)}
+            handleSubmit={handleLogin}
+          />
+        </Togglable>
       )}
 
       <div>
