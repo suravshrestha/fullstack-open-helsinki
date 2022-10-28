@@ -3,6 +3,7 @@ module.exports = {
     browser: true,
     es2021: true,
     node: true, // for 'module' is not defined. (no-undef)
+    jest: true, // for 'test', 'expect' is not defined. (no-undef)
   },
   extends: ["eslint:recommended", "plugin:react/recommended"],
   overrides: [],
