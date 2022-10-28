@@ -12,28 +12,33 @@ const note = {
 };
 
 describe("<Note />", () => {
-  test("has content", async () => {
-    const mockHandler = jest.fn();
+  let container, mockHandler;
 
-    // Render into a container which is appended to document.body
-    render(<Note note={note} toggleImportance={mockHandler} />);
+  beforeEach(() => {
+    mockHandler = jest.fn();
 
+    // // Render into a container which is appended to document.body
+    // render(<Note note={note} toggleImportance={mockHandler} />);
+
+    container = render(
+      <Note note={note} toggleImportance={mockHandler} />
+    ).container;
+  });
+
+  test("renders content", () => {
     // Search for all elements that have a text node with the matching textContent
     const element = screen.getByText(
-      "Component testing is done with react-testing-library"
+      "Component testing is done with react-testing-library",
+      { exact: false } // substring match
     );
 
     // Print the element to the console
-    screen.debug(element);
+    // screen.debug(element);
 
     expect(element).toBeDefined();
   });
 
   test("has clickable button", async () => {
-    const mockHandler = jest.fn();
-
-    render(<Note note={note} toggleImportance={mockHandler} />);
-
     // Setup a session to interact with the rendered component
     const user = userEvent.setup();
 
@@ -45,10 +50,8 @@ describe("<Note />", () => {
   });
 
   test("has class .note", () => {
-    const { container } = render(<Note note={note} />);
-
     // Print the document
-    screen.debug();
+    // screen.debug();
 
     const div = container.querySelector(".note");
     expect(div).toHaveTextContent(
