@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import Note from "./components/Note";
 import NoteForm from "./components/NoteForm";
@@ -68,10 +68,21 @@ const App = () => {
   console.log("render", notes.length, "notes");
 
   const addNote = (noteObject) => {
+    // Hide the note form after a new note has been created
+    noteFormRef.current.toggleVisibility();
+
     noteService.create(noteObject).then((returnedNote) => {
       setNotes(notes.concat(returnedNote));
     });
   };
+
+  const noteFormRef = useRef();
+
+  const noteForm = () => (
+    <Togglable buttonLabel="new note" ref={noteFormRef}>
+      <NoteForm createNote={addNote} />
+    </Togglable>
+  );
 
   const notesToShow = showAll ? notes : notes.filter((note) => note.important);
 
@@ -125,9 +136,7 @@ const App = () => {
       {user ? (
         <div>
           <p>{user.name ? user.name : "Unknown user"} logged in</p>
-          <Togglable buttonLabel="new note">
-            <NoteForm createNote={addNote} />
-          </Togglable>
+          {noteForm()}
         </div>
       ) : (
         <Togglable buttonLabel="login">

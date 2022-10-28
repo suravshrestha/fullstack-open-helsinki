@@ -1,8 +1,10 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useImperativeHandle, forwardRef } from "react";
 import PropTypes from "prop-types";
 
-const Togglable = (props) => {
+// eslint-disable-next-line react/display-name
+const Togglable = forwardRef((props, ref) => {
+  // forwardRef allows this component to access the ref that is assigned for it
   const [visible, setVisible] = useState(false);
 
   const hideWhenVisible = { display: visible ? "none" : "" };
@@ -11,6 +13,14 @@ const Togglable = (props) => {
   const toggleVisibility = () => {
     setVisible(!visible);
   };
+
+  // useImperativeHandle hook is used for defining functions in a component
+  // which can be invoked from outside of the component.
+  useImperativeHandle(ref, () => {
+    return {
+      toggleVisibility,
+    };
+  });
 
   return (
     <div>
@@ -23,7 +33,7 @@ const Togglable = (props) => {
       </div>
     </div>
   );
-};
+});
 
 Togglable.propTypes = {
   buttonLabel: PropTypes.string.isRequired,
