@@ -51,10 +51,13 @@ describe("Note app", function () {
 
   describe("when logged in", function () {
     beforeEach(function () {
-      cy.contains("button", "login").click();
-      cy.get("input:first").type("johndoe");
-      cy.get("input:last").type("ilovejohndoe");
-      cy.get("#login-button").click();
+      // cy.contains("button", "login").click();
+      // cy.get("input:first").type("johndoe");
+      // cy.get("input:last").type("ilovejohndoe");
+      // cy.get("#login-button").click();
+
+      // Custom cypress command login defined in ../support/commands.js
+      cy.login({ username: "johndoe", password: "ilovejohndoe" });
     });
 
     it("a new note can be created", function () {
@@ -66,9 +69,10 @@ describe("Note app", function () {
 
     describe("and a note exists", function () {
       beforeEach(function () {
-        cy.contains("button", "new note").click();
-        cy.get("#note-input").type("another note cypress");
-        cy.contains("button", "save").click();
+        cy.createNote({
+          content: "another note cypress",
+          important: true,
+        });
       });
 
       it("it can be made not important", function () {
