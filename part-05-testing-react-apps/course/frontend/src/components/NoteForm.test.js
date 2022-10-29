@@ -22,9 +22,9 @@ test("<NoteForm /> updates parent state and calls onSubmit", async () => {
   await user.type(input, "testing a form...");
   await user.click(sendButton);
 
-  // Ensures that form submit calles the createNote method
+  // createNote is called once
   expect(createNote.mock.calls).toHaveLength(1);
 
-  // Ensures that the event handler is called with the right params
+  // The first argument of the first call to the createNote was "testing a form..."
   expect(createNote.mock.calls[0][0].content).toBe("testing a form...");
 });

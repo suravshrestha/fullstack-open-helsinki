@@ -45,7 +45,7 @@ describe("<Note />", () => {
     const button = screen.getByText("make not important");
     await user.click(button);
 
-    // Test if exact one click
+    // mockHandler is called once
     expect(mockHandler.mock.calls).toHaveLength(1);
   });
 
