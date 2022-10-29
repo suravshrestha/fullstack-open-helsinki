@@ -5,7 +5,11 @@ module.exports = {
     node: true, // for 'module' is not defined. (no-undef)
     jest: true, // for 'test', 'expect' is not defined. (no-undef)
   },
-  extends: ["eslint:recommended", "plugin:react/recommended"],
+  extends: [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:cypress/recommended",
+  ],
   overrides: [],
   parserOptions: {
     ecmaVersion: "latest",
