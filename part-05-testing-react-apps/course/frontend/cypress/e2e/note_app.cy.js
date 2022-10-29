@@ -30,6 +30,25 @@ describe("Note app", function () {
     cy.contains("John Doe logged in");
   });
 
+  // We can change it to it.only to run that test only
+  // it.only("login fails with wrong password", function () {
+  it("login fails with wrong password", function () {
+    cy.contains("button", "login").click();
+    cy.get("#username").type("johndoe");
+    cy.get("#password").type("wrong");
+    cy.get("#login-button").click();
+
+    cy.get(".error").contains("wrong credentials");
+
+    // With .should (allows more diverse tests)
+    cy.get(".error")
+      .should("contain", "wrong credentials")
+      .and("have.css", "color", "rgb(255, 0, 0)")
+      .and("have.css", "border-style", "solid");
+
+    cy.get("html").should("not.contain", "John Doe logged in");
+  });
+
   describe("when logged in", function () {
     beforeEach(function () {
       cy.contains("button", "login").click();
