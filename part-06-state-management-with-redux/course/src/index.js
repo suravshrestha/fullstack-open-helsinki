@@ -11,26 +11,35 @@ const store = createStore(noteReducer);
 
 const generateId = () => Number((Math.random() * 1000000).toFixed(0));
 
+// Functions that create actions are called action creators.
+const createNote = (content) => {
+  return {
+    type: "NEW_NOTE",
+    data: {
+      content,
+      important: false,
+      id: generateId(),
+    },
+  };
+};
+
+const toggleImportanceOf = (id) => {
+  return {
+    type: "TOGGLE_IMPORTANCE",
+    data: { id },
+  };
+};
+
 const App = () => {
   const addNote = (event) => {
     event.preventDefault();
     const content = event.target.note.value; // <input name="note" />
     event.target.note.value = "";
-    store.dispatch({
-      type: "NEW_NOTE",
-      data: {
-        content,
-        important: false,
-        id: generateId(),
-      },
-    });
+    store.dispatch(createNote(content));
   };
 
   const toggleImportance = (id) => {
-    store.dispatch({
-      type: "TOGGLE_IMPORTANCE",
-      data: { id },
-    });
+    store.dispatch(toggleImportanceOf(id));
   };
 
   return (
