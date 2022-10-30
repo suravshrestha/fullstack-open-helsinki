@@ -3,23 +3,19 @@ import ReactDOM from "react-dom/client";
 
 import App from "./App";
 
-import { createStore, combineReducers } from "redux";
+import { configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 
-import noteReducer from "./reducers/noteReducer";
-import filterReducer from "./reducers/filterReducer";
+import noteReducer, { createNote } from "./reducers/noteReducer";
+import filterReducer, { filterChange } from "./reducers/filterReducer";
 
-import { createNote } from "./reducers/noteReducer";
-import { filterChange } from "./reducers/filterReducer";
-
-const reducer = combineReducers({
-  notes: noteReducer,
-  filter: filterReducer,
+// Configure the Redux store holding the state of the app.
+const store = configureStore({
+  reducer: {
+    notes: noteReducer,
+    filter: filterReducer,
+  },
 });
-
-// Create a Redux store holding the state of the app.
-// Its API is { subscribe, dispatch, getState }.
-const store = createStore(reducer);
 
 console.log(store.getState());
 

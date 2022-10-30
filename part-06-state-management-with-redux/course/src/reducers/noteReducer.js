@@ -1,3 +1,5 @@
+import { createSlice } from "@reduxjs/toolkit";
+
 const initialState = [
   {
     content: "reducer defines how redux store works",
@@ -11,53 +13,44 @@ const initialState = [
   },
 ];
 
-const noteReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case "NEW_NOTE":
-      // Incorrect: Reducer must not directly mutate the state
-      // Docs: https://redux.js.org/tutorials/essentials/part-1-overview-concepts#reducers
-      // state.push(action.data);
-      // return state;
+const generateId = () => Number((Math.random() * 1000000).toFixed(0));
 
-      // OK
-      // return state.concat(action.data);
+// returns an object containing the reducer as well as
+// the action creators defined by the reducers parameter.
+const noteSlice = createSlice({
+  name: "notes", // prefix which is used in the action's type values
+  initialState,
+  reducers: {
+    createNote(state, action) {
+      // type value "notes/createNote"
+      const content = action.payload; // argument provided by calling the action creator
 
-      // With spread operator
-      return [...state, action.data];
+      // With Redux, this is incorrect as reducer should not directly mutate the state
+      // but Redux Toolkit uses Immer library which makes it possible to mutate the
+      // state arg inside the reducer
+      state.push({
+        content,
+        important: false,
+        id: generateId(),
+      });
+    },
 
-    case "TOGGLE_IMPORTANCE": {
-      const id = action.data.id;
+    toggleImportanceOf(state, action) {
+      // type value "notes/toggleImportanceOf"
+      const id = action.payload;
       const noteToChange = state.find((n) => n.id === id);
       const changedNote = {
         ...noteToChange,
         important: !noteToChange.important,
       };
+
       return state.map((note) => (note.id !== id ? note : changedNote));
-    }
-    default:
-      return state;
-  }
-};
-
-const generateId = () => Number((Math.random() * 1000000).toFixed(0));
-
-// Functions that create actions are called action creators.
-export const createNote = (content) => {
-  return {
-    type: "NEW_NOTE",
-    data: {
-      content,
-      important: false,
-      id: generateId(),
     },
-  };
-};
+  },
+});
 
-export const toggleImportanceOf = (id) => {
-  return {
-    type: "TOGGLE_IMPORTANCE",
-    data: { id },
-  };
-};
+// Export the action creators
+export const { createNote, toggleImportanceOf } = noteSlice.actions;
 
-export default noteReducer;
+// Export the reducer
+export default noteSlice.reducer;
