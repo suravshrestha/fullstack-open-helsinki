@@ -1,21 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+import noteService from "../services/notes";
+
 // returns an object containing the reducer as well as
 // the action creators defined by the reducers parameter.
 const noteSlice = createSlice({
   name: "notes", // prefix which is used in the action's type values
   initialState: [],
   reducers: {
-    createNote(state, action) {
-      // type value "notes/createNote"
-      // action.payload is the argument provided when calling the action creator
-
-      // With Redux, this is incorrect as reducer should not directly mutate the state
-      // but Redux Toolkit uses Immer library which makes it possible to mutate the
-      // state arg inside the reducer
-      state.push(action.payload);
-    },
-
     toggleImportanceOf(state, action) {
       // type value "notes/toggleImportanceOf"
       const id = action.payload;
@@ -39,8 +31,22 @@ const noteSlice = createSlice({
 });
 
 // Export the action creators
-export const { createNote, toggleImportanceOf, appendNote, setNotes } =
-  noteSlice.actions;
+export const { toggleImportanceOf, appendNote, setNotes } = noteSlice.actions;
+
+export const initializeNotes = () => {
+  // asynchronous action
+  return async (dispatch) => {
+    const notes = await noteService.getAll();
+    dispatch(setNotes(notes));
+  };
+};
+
+export const createNote = (content) => {
+  return async (dispatch) => {
+    const newNote = await noteService.createNew(content);
+    dispatch(appendNote(newNote));
+  };
+};
 
 // Export the reducer
 export default noteSlice.reducer;
