@@ -25,7 +25,7 @@ export const initializeAnecdotes = () => {
   // asynchronous action
   return async (dispatch) => {
     const anecdotes = await anecdoteService.getAll();
-    dispatch(setAnecdotes(anecdotes));
+    dispatch(setAnecdotes(anecdotes.sort((a, b) => b.votes - a.votes)));
   };
 };
 
@@ -47,9 +47,9 @@ export const vote = (id) => {
 
     dispatch(
       setAnecdotes(
-        anecdotes
-          .map((anecdote) => (anecdote.id === id ? changedAnecdote : anecdote))
-          .sort((a, b) => b.votes - a.votes)
+        anecdotes.map((anecdote) =>
+          anecdote.id === id ? changedAnecdote : anecdote
+        )
       )
     );
   };
