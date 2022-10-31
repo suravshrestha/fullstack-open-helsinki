@@ -13,6 +13,7 @@ const Note = ({ note, handleClick }) => {
 const Notes = () => {
   const dispatch = useDispatch();
   const notes = useSelector(({ filter, notes }) => {
+    // "Do not" mutate state here, only return a piece of the state
     if (filter === "ALL") {
       return notes;
     }

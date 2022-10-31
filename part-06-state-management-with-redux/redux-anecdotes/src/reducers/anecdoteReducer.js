@@ -1,3 +1,5 @@
+import { createSlice } from "@reduxjs/toolkit";
+
 const anecdotesAtStart = [
   "If it hurts, do it more often",
   "Adding manpower to a late software project makes it later!",
@@ -19,48 +21,43 @@ const asObject = (anecdote) => {
 
 const initialState = anecdotesAtStart.map(asObject);
 
-const reducer = (state = initialState, action) => {
-  console.log("state now: ", state);
-  console.log("action", action);
+// returns an object containing the reducer as well as
+// the action creators defined by the reducers parameter.
+const anecdoteSlice = createSlice({
+  name: "anecdotes", // prefix which is used in the action's type values
+  initialState,
+  reducers: {
+    createAnecdote(state, action) {
+      // type value "anecdotes/createAnecdote"
+      const content = action.payload; // argument provided by calling the action creator
 
-  switch (action.type) {
-    case "NEW_ANECDOTE":
-      return [...state, action.data];
+      // With Redux, this is incorrect as reducer should not directly mutate the state
+      // but Redux Toolkit uses Immer library which makes it possible to mutate the
+      // state arg inside the reducer
+      state.push({
+        content,
+        id: getId(),
+        votes: 0,
+      });
+    },
 
-    case "VOTE":
-      const id = action.data.id;
+    vote(state, action) {
+      const id = action.payload;
       const anecdoteToChange = state.find((a) => a.id === id);
       const changedAnecdote = {
         ...anecdoteToChange,
         votes: anecdoteToChange.votes + 1,
       };
 
-      return state.map((anecdote) =>
-        anecdote.id === id ? changedAnecdote : anecdote
-      );
-
-    default:
-      return state;
-  }
-};
-
-// Action creator
-export const createAnecdote = (content) => {
-  return {
-    type: "NEW_ANECDOTE",
-    data: {
-      content,
-      id: getId(),
-      votes: 0,
+      return state
+        .map((anecdote) => (anecdote.id === id ? changedAnecdote : anecdote))
+        .sort((a, b) => b.votes - a.votes);
     },
-  };
-};
+  },
+});
 
-export const vote = (id) => {
-  return {
-    type: "VOTE",
-    data: { id },
-  };
-};
+// Export the action creators
+export const { createAnecdote, vote } = anecdoteSlice.actions;
 
-export default reducer;
+// Export the reducer
+export default anecdoteSlice.reducer;
