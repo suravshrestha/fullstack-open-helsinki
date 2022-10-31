@@ -12,11 +12,13 @@ export const notificationSlice = createSlice({
 
 const { showNotification } = notificationSlice.actions;
 
+let timeoutId;
 export const setNotification = (notification, timeoutInSeconds) => {
   return async (dispatch) => {
     dispatch(showNotification(notification));
+    clearTimeout(timeoutId);
 
-    setTimeout(() => {
+    timeoutId = setTimeout(() => {
       dispatch(showNotification(null));
     }, timeoutInSeconds * 1000);
   };

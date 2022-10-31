@@ -34,7 +34,7 @@ const AnecdoteList = () => {
           anecdote={anecdote}
           handleClick={() => {
             dispatch(vote(anecdote.id));
-            dispatch(setNotification(`you voted '${anecdote.content}'`, 10));
+            dispatch(setNotification(`you voted '${anecdote.content}'`, 5));
           }}
         />
       ))}
