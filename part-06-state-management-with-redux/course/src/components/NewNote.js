@@ -17,4 +17,12 @@ const NewNote = (props) => {
   );
 };
 
-export default connect(null, { createNote })(NewNote);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    createNote: (value) => {
+      dispatch(createNote(value));
+    },
+  };
+};
+
+export default connect(null, mapDispatchToProps)(NewNote);
