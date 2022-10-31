@@ -6,7 +6,9 @@ import App from "./App";
 import { configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 
-import noteReducer, { createNote } from "./reducers/noteReducer";
+import noteService from "./services/notes";
+
+import noteReducer, { createNote, setNotes } from "./reducers/noteReducer";
 import filterReducer, { filterChange } from "./reducers/filterReducer";
 
 // Configure the Redux store holding the state of the app.
@@ -16,6 +18,8 @@ const store = configureStore({
     filter: filterReducer,
   },
 });
+
+noteService.getAll().then((notes) => store.dispatch(setNotes(notes)));
 
 console.log(store.getState());
 
