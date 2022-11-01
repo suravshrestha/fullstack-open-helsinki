@@ -9,7 +9,7 @@ import {
   useMatch,
 } from "react-router-dom";
 
-import { Table, Form, Button, Alert, Navbar, Nav } from "react-bootstrap";
+import { Table, Button, Alert, Navbar, Nav } from "react-bootstrap";
 import {
   Container,
   TableContainer,
@@ -17,6 +17,7 @@ import {
   TableRow,
   TableCell,
   Paper,
+  TextField,
 } from "@mui/material";
 
 const Home = () => (
@@ -91,17 +92,19 @@ const Login = (props) => {
   return (
     <div>
       <h2>login</h2>
-      <Form onSubmit={onSubmit}>
-        <Form.Group>
-          <Form.Label>username:</Form.Label>
-          <Form.Control type="text" name="username" />
-          <Form.Label>password:</Form.Label>
-          <Form.Control type="password" />
-          <Button variant="primary" type="submit">
+      <form onSubmit={onSubmit}>
+        <div>
+          <TextField label="username" />
+        </div>
+        <div>
+          <TextField label="password" type="password" />
+        </div>
+        <div>
+          <Button variant="contained" color="primary" type="submit">
             login
           </Button>
-        </Form.Group>
-      </Form>
+        </div>
+      </form>
     </div>
   );
 };
