@@ -9,7 +9,7 @@ import {
   useMatch,
 } from "react-router-dom";
 
-import { Table, Button, Alert, Navbar, Nav } from "react-bootstrap";
+import { Table, Button, Navbar, Nav } from "react-bootstrap";
 import {
   Container,
   TableContainer,
@@ -18,6 +18,7 @@ import {
   TableCell,
   Paper,
   TextField,
+  Alert,
 } from "@mui/material";
 
 const Home = () => (
@@ -153,7 +154,7 @@ const App = () => {
 
   return (
     <Container>
-      {message && <Alert variant="success">{message}</Alert>}
+      {message && <Alert severity="success">{message}</Alert>}
 
       <div>
         <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
