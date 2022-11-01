@@ -9,16 +9,19 @@ import {
   useMatch,
 } from "react-router-dom";
 
-import { Table, Button, Navbar, Nav } from "react-bootstrap";
 import {
   Container,
+  Button,
   TableContainer,
+  Table,
   TableBody,
   TableRow,
   TableCell,
   Paper,
   TextField,
   Alert,
+  AppBar,
+  Toolbar,
 } from "@mui/material";
 
 const Home = () => (
@@ -143,10 +146,6 @@ const App = () => {
     }, 10000);
   };
 
-  const padding = {
-    padding: 5,
-  };
-
   const match = useMatch("/notes/:id");
   const note = match
     ? notes.find((note) => note.id === Number(match.params.id))
@@ -156,39 +155,26 @@ const App = () => {
     <Container>
       {message && <Alert severity="success">{message}</Alert>}
 
-      <div>
-        <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
-          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-          <Navbar.Collapse id="responsive-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link href="#" as="span">
-                <Link style={padding} to="/">
-                  home
-                </Link>
-              </Nav.Link>
-              <Nav.Link href="#" as="span">
-                <Link style={padding} to="/notes">
-                  notes
-                </Link>
-              </Nav.Link>
-              <Nav.Link href="#" as="span">
-                <Link style={padding} to="/users">
-                  users
-                </Link>
-              </Nav.Link>
-              <Nav.Link href="#" as="span">
-                {user ? (
-                  <em style={padding}>{user} logged in</em>
-                ) : (
-                  <Link style={padding} to="/login">
-                    login
-                  </Link>
-                )}
-              </Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Navbar>
-      </div>
+      <AppBar position="static">
+        <Toolbar>
+          <Button color="inherit" component={Link} to="/">
+            home
+          </Button>
+          <Button color="inherit" component={Link} to="/notes">
+            notes
+          </Button>
+          <Button color="inherit" component={Link} to="/users">
+            users
+          </Button>
+          {user ? (
+            <em>{user} logged in</em>
+          ) : (
+            <Button color="inherit" component={Link} to="/login">
+              login
+            </Button>
+          )}
+        </Toolbar>
+      </AppBar>
 
       <Routes>
         <Route path="/notes/:id" element={<Note note={note} />} />
