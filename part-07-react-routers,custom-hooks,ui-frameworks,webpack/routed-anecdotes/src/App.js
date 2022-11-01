@@ -1,13 +1,7 @@
 import { useState } from "react";
+import { Routes, Route, Link, useNavigate, useMatch } from "react-router-dom";
 
-import {
-  Routes,
-  Route,
-  Link,
-  Navigate,
-  useNavigate,
-  useMatch,
-} from "react-router-dom";
+import { useField } from "./hooks";
 
 const Menu = () => {
   const padding = {
@@ -86,22 +80,29 @@ const Footer = () => (
 );
 
 const CreateNew = (props) => {
-  const [content, setContent] = useState("");
-  const [author, setAuthor] = useState("");
-  const [info, setInfo] = useState("");
+  const { reset: resetContent, ...content } = useField("text");
+  const { reset: resetAuthor, ...author } = useField("text");
+  const { reset: resetInfo, ...info } = useField("text");
+
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     props.addNew({
-      content,
-      author,
-      info,
+      content: content.value,
+      author: author.value,
+      info: info.value,
       votes: 0,
     });
 
     navigate("/");
+  };
+
+  const resetFields = () => {
+    resetContent();
+    resetAuthor();
+    resetInfo();
   };
 
   return (
@@ -109,30 +110,18 @@ const CreateNew = (props) => {
       <h2>create a new anecdote</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          content{" "}
-          <input
-            name="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
+          content <input {...content} />
         </div>
         <div>
-          author{" "}
-          <input
-            name="author"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-          />
+          author <input {...author} />
         </div>
         <div>
-          url for more info{" "}
-          <input
-            name="info"
-            value={info}
-            onChange={(e) => setInfo(e.target.value)}
-          />
+          url for more info <input {...info} />
         </div>
-        <button>create</button>
+        <button type="submit">create</button>{" "}
+        <button type="reset" onClick={resetFields}>
+          reset
+        </button>
       </form>
     </div>
   );
@@ -161,11 +150,22 @@ const App = () => {
   const [notification, setNotification] = useState("");
 
   const addNew = (anecdote) => {
+    if (!anecdote.content) {
+      clearTimeout(timeoutId);
+      setNotification("Anecdote can't be empty!");
+
+      timeoutId = setTimeout(() => {
+        setNotification("");
+      }, 5000);
+
+      return;
+    }
+
     anecdote.id = Math.round(Math.random() * 10000);
     setAnecdotes(anecdotes.concat(anecdote));
 
     clearTimeout(timeoutId);
-    setNotification(`a new anecdote '${anecdote.content}' created!'`);
+    setNotification(`a new anecdote '${anecdote.content}' created!`);
 
     timeoutId = setTimeout(() => {
       setNotification("");
@@ -196,17 +196,17 @@ const App = () => {
 
       <Menu />
 
-      <p>{notification}</p>
+      <h3>{notification}</h3>
 
       <Routes>
         <Route path="/" element={<AnecdoteList anecdotes={anecdotes} />} />
         <Route
           path="/anecdotes/:id"
           element={
-            match ? (
+            match && anecdote ? (
               <Anecdote anecdote={anecdote} />
             ) : (
-              <div>404: Page not found</div>
+              <p>Anecdote not found</p>
             )
           }
         />
