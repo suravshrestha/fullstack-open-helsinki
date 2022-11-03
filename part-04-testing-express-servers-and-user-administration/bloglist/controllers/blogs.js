@@ -9,7 +9,7 @@ const Blog = require("../models/blog");
 blogsRouter.get("/", async (req, res) => {
   // populate: Mongoose's join query
   const blogs = await Blog.find({}).populate("user", {
-    // Send only "username" and "name" (including user "id")
+    // Populate and send "user" object with "username" and "name" (including user "id")
     username: 1,
     name: 1,
   });
@@ -35,7 +35,13 @@ blogsRouter.post("/", tokenExtractor, userExtractor, async (req, res) => {
   user.blogs = user.blogs.concat(savedBlog._id);
   await user.save();
 
-  res.status(201).json(savedBlog);
+  const blogToReturn = await Blog.findById(savedBlog._id).populate("user", {
+    // Populate and send "user" object with "username" and "name" (including user "id")
+    username: 1,
+    name: 1,
+  });
+
+  res.status(201).json(blogToReturn);
 });
 
 blogsRouter.put("/:id", async (req, res) => {
@@ -44,7 +50,7 @@ blogsRouter.put("/:id", async (req, res) => {
     runValidators: true,
     context: "query",
   }).populate("user", {
-    // Send only "username" and "name" (including user "id")
+    // Populate and send "user" object with "username" and "name" (including user "id")
     username: 1,
     name: 1,
   });

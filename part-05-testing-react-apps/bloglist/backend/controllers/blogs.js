@@ -9,7 +9,7 @@ const Blog = require("../models/blog");
 blogsRouter.get("/", async (req, res) => {
   // populate: Mongoose's join query
   const blogs = await Blog.find({}).populate("user", {
-    // Send only "username" and "name" (including user "id")
+    // Populate and send "user" object with "username" and "name" (including user "id")
     username: 1,
     name: 1,
   });
@@ -44,7 +44,7 @@ blogsRouter.put("/:id", async (req, res) => {
     runValidators: true,
     context: "query",
   }).populate("user", {
-    // Send only "username" and "name" (including user "id")
+    // Populate and send "user" object with "username" and "name" (including user "id")
     username: 1,
     name: 1,
   });

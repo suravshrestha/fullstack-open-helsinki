@@ -18,7 +18,7 @@ const getTokenFrom = (req) => {
 notesRouter.get("/", async (req, res) => {
   // populate: Mongoose's join query
   const notes = await Note.find({}).populate("user", {
-    // Send only "username" and "name" (including user "id")
+    // Populate and send "user" object with "username" and "name" (including user "id")
     username: 1,
     name: 1,
   });
