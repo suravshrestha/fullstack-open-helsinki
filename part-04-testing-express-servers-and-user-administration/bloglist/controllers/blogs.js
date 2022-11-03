@@ -43,6 +43,10 @@ blogsRouter.put("/:id", async (req, res) => {
     new: true,
     runValidators: true,
     context: "query",
+  }).populate("user", {
+    // Send only "username" and "name" (including user "id")
+    username: 1,
+    name: 1,
   });
 
   if (updatedBlog) {
