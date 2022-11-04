@@ -1,0 +1,24 @@
+body {
+  background-color: #232f3e;
+  color: whitesmoke !important;
+}
+
+.nav {
+  background-color: #131921 !important;
+}
+
+input {
+  background-color: #6c757d !important;
+  color: whitesmoke !important;
+  border-color: #212529 !important;
+}
+
+input::placeholder {
+  color: whitesmoke !important;
+  opacity: 0.65 !important;
+}
+
+.blog-list-item {
+  background-color: #161b22 !important;
+  border-color: #30363d !important;
+}

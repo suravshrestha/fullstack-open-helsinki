@@ -1,0 +1,17 @@
+{
+  "name": "bloglist",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\" ",
+    "test": "concurrently \"cd backend && npm run start:test\" \"cd frontend && npm start\" "
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^7.5.0",
+    "prettier": "2.7.1"
+  }
+}
