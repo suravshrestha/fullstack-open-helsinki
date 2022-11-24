@@ -68,9 +68,6 @@ notesRouter.put("/:id", (req, res, next) => {
 
     // By default, validations are not run when findByIdAndUpdate is executed
     runValidators: true,
-
-    // For technical reasons, context option must be set to "query"
-    context: "query",
   })
     .then((updatedNote) => {
       // The optional parameter { new : true } gets the updated note
