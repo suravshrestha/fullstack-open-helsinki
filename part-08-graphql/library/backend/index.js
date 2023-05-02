@@ -135,6 +135,8 @@ const typeDefs = `
   }
 `;
 
+const { v1: uuid } = require("uuid");
+
 const resolvers = {
   Query: {
     bookCount: () => books.length,
@@ -168,11 +170,11 @@ const resolvers = {
 
   Mutation: {
     addBook: (root, args) => {
-      const book = { ...args };
+      const book = { ...args, id: uuid() };
       books = books.concat(book);
 
       if (!authors.find((author) => author.name === args.author)) {
-        const author = { name: args.author };
+        const author = { name: args.author, id: uuid() };
         authors = authors.concat(author);
       }
 
