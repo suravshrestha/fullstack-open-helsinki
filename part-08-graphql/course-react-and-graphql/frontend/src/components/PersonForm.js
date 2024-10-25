@@ -11,10 +11,26 @@ const PersonForm = ({ setError }) => {
 
   // Mutation functions are defined using the useMutation hook
   const [createPerson] = useMutation(CREATE_PERSON, {
+    // refetch queries after the mutation has been completed
+    // pretty good approach but,
+    // drawback: the query is always rerun with any updates
     refetchQueries: [{ query: ALL_PERSONS }], // pass as many queries as you need
 
+    // the above approach can be optimized by manually updating the cache
+    // Parameters:
+    // cache: reference to the cache
+    // response: data returned by the mutation
+    update: (cache, response) => {
+      cache.updateQuery({ query: ALL_PERSONS }, ({ allPersons }) => {
+        return {
+          allPersons: allPersons.concat(response.data.addPerson),
+        };
+      });
+    },
+
     onError: (error) => {
-      setError(error.graphQLErrors[0].message);
+      const messages = error.graphQLErrors.map((e) => e.message).join("\n");
+      setError(messages);
     },
   });
 
