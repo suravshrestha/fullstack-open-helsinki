@@ -6,9 +6,13 @@ import {
   ApolloProvider,
   InMemoryCache,
   createHttpLink,
+  split,
   gql,
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
+import { getMainDefinition } from "@apollo/client/utilities";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { createClient } from "graphql-ws";
 
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem("phonenumbers-user-token");
@@ -20,16 +24,32 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+// for the http connection
 const httpLink = createHttpLink({
   uri: "http://localhost:4000",
 });
 
-const client = new ApolloClient({
-  cache: new InMemoryCache(),
+// for the websocket connection
+const wsLink = new GraphQLWsLink(createClient({ url: "ws://localhost:4000" }));
+
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === "OperationDefinition" &&
+      definition.operation === "subscription"
+    );
+  },
+  wsLink,
 
   // The link is modified by the context defined by the authLink object so that a possible token\
   // in localStorage is set to header authorization for each request to the server.
-  link: authLink.concat(httpLink),
+  authLink.concat(httpLink),
+);
+
+const client = new ApolloClient({
+  cache: new InMemoryCache(),
+  link: splitLink,
 });
 
 const query = gql`

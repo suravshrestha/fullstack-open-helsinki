@@ -35,8 +35,8 @@ const Persons = ({ persons }) => {
   return (
     <div>
       <h2>Persons</h2>
-      {persons.map((p) => (
-        <div key={p.name}>
+      {persons.map((p, i) => (
+        <div key={i}>
           {p.name} {p.phone}{" "}
           <button onClick={() => setNameToSearch(p.name)}>show address</button>
         </div>
