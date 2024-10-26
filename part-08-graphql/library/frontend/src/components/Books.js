@@ -1,17 +1,28 @@
-import { ALL_BOOKS } from "../queries";
-
+import { useState } from "react";
 import { useQuery } from "@apollo/client";
+import { BOOKS_BY_GENRE } from "../queries";
 
 const Books = ({ show }) => {
-  const result = useQuery(ALL_BOOKS);
+  const [selectedGenre, setSelectedGenre] = useState(null);
+
+  const { data, loading } = useQuery(BOOKS_BY_GENRE, {
+    variables: { genre: selectedGenre },
+  });
 
   if (!show) {
     return null;
   }
 
-  if (result.loading) {
+  if (loading) {
     return <div>loading...</div>;
   }
+
+  // Get all unique genres from the books
+  const genres = Array.from(
+    new Set(data.allBooks.flatMap((book) => book.genres)),
+  );
+
+  const books = data.allBooks;
 
   return (
     <div>
@@ -20,19 +31,28 @@ const Books = ({ show }) => {
       <table>
         <tbody>
           <tr>
-            <th></th>
-            <th>author</th>
-            <th>published</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Published</th>
           </tr>
-          {result.data.allBooks.map((a, i) => (
+          {books.map((book, i) => (
             <tr key={i}>
-              <td>{a.title}</td>
-              <td>{a.author}</td>
-              <td>{a.published}</td>
+              <td>{book.title}</td>
+              <td>{book.author.name}</td>
+              <td>{book.published}</td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <div>
+        <button onClick={() => setSelectedGenre(null)}>All Genres</button>
+        {genres.map((genre, i) => (
+          <button key={i} onClick={() => setSelectedGenre(genre)}>
+            {genre}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

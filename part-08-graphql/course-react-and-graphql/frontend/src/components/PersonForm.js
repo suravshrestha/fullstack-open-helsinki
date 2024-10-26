@@ -14,7 +14,7 @@ const PersonForm = ({ setError }) => {
     // refetch queries after the mutation has been completed
     // pretty good approach but,
     // drawback: the query is always rerun with any updates
-    refetchQueries: [{ query: ALL_PERSONS }], // pass as many queries as you need
+    // refetchQueries: [{ query: ALL_PERSONS }], // pass as many queries as you need
 
     // the above approach can be optimized by manually updating the cache
     // Parameters:

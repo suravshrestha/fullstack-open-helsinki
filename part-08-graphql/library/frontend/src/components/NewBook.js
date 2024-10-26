@@ -11,21 +11,37 @@ const NewBook = ({ show }) => {
   const [genres, setGenres] = useState([]);
 
   const [addBook] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
+    update: (cache, response) => {
+      cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+        return {
+          allBooks: allBooks.concat(response.data.addBook),
+        };
+      });
 
+      cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthors }) => {
+        const authorExists = allAuthors.find(
+          (a) => a.name === response.data.addBook.author.name,
+        );
+        if (!authorExists) {
+          return {
+            allAuthors: allAuthors.concat(response.data.addBook.author),
+          };
+        } else {
+          return { allAuthors };
+        }
+      });
+    },
     onError: (error) => {
-      window.alert(error);
+      window.alert(error.message);
     },
   });
-
-  if (!show) {
-    return null;
-  }
 
   const submit = async (event) => {
     event.preventDefault();
 
-    addBook({ variables: { title, author, published, genres } });
+    addBook({
+      variables: { title, author, published: parseInt(published), genres },
+    });
 
     setTitle("");
     setPublished("");
@@ -33,6 +49,10 @@ const NewBook = ({ show }) => {
     setGenres([]);
     setGenre("");
   };
+
+  if (!show) {
+    return null;
+  }
 
   const addGenre = () => {
     setGenres(genres.concat(genre));
@@ -60,7 +80,7 @@ const NewBook = ({ show }) => {
           published{" "}
           <input
             type="number"
-            value={published}
+            value={published || ""}
             onChange={({ target }) => setPublished(parseInt(target.value))}
           />
         </div>
