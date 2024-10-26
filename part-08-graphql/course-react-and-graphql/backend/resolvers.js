@@ -1,6 +1,12 @@
 const { GraphQLError } = require("graphql");
 
+const { PubSub } = require("graphql-subscriptions");
+const pubsub = new PubSub();
+
 const Person = require("./models/personModel");
+const User = require("./models/userModel");
+
+const jwt = require("jsonwebtoken");
 
 const resolvers = {
   Query: {
@@ -57,6 +63,11 @@ const resolvers = {
           },
         });
       }
+
+      // Publish a notification about the operation to all subscribers
+      // Sends a WebSocket message about the added person to all the clients
+      // registered in the iterator PERSON_ADDED.
+      pubsub.publish("PERSON_ADDED", { personAdded: person });
 
       return person;
     },
@@ -135,6 +146,18 @@ const resolvers = {
       };
 
       return { value: jwt.sign(userForToken, process.env.JWT_SECRET) };
+    },
+  },
+
+  // The resolver of the `personAdded` subscription registers and
+  // saves info about all the clients that do the subscription.
+  // The clients are saved to an "iterator object" called PERSON_ADDED
+  //
+  // The iterator name is an arbitrary string, but to follow the convention,
+  // it is the subscription name written in capital letters.
+  Subscription: {
+    personAdded: {
+      subscribe: () => pubsub.asyncIterator("PERSON_ADDED"),
     },
   },
 };
