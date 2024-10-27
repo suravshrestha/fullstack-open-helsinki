@@ -1,5 +1,12 @@
 const { ApolloServer } = require("@apollo/server");
-const { startStandaloneServer } = require("@apollo/server/standalone");
+const { expressMiddleware } = require("@apollo/server/express4");
+const {
+  ApolloServerPluginDrainHttpServer,
+} = require("@apollo/server/plugin/drainHttpServer");
+const { makeExecutableSchema } = require("@graphql-tools/schema");
+const express = require("express");
+const cors = require("cors");
+const http = require("http");
 
 const User = require("./models/userModel");
 
@@ -26,31 +33,55 @@ mongoose
     console.log("error connection to MongoDB:", error.message);
   });
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-});
+// setup is now within a function
+const start = async () => {
+  const app = express();
+  const httpServer = http.createServer(app);
 
-startStandaloneServer(server, {
-  listen: { port: 4000 },
+  const server = new ApolloServer({
+    schema: makeExecutableSchema({
+      typeDefs, // GraphQL schema describing types
+      resolvers, // defines how GraphQL queries are responded to
+    }),
+    plugins: [
+      // Official docs:
+      // We highly recommend using this plugin to ensure your server shuts down gracefully.
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+    ],
+  });
 
-  // The object returned by context is given to all resolvers as their third parameter.
-  // Context is the right place to do things which are shared by multiple resolvers,
-  // like user identification.
-  context: async ({ req, res }) => {
-    const auth = req ? req.headers.authorization : null;
+  await server.start();
 
-    if (auth && auth.startsWith("Bearer ")) {
-      const decodedToken = jwt.verify(
-        auth.substring(7),
-        process.env.JWT_SECRET
-      );
+  app.use(
+    "/",
+    cors(),
+    express.json(),
+    expressMiddleware(server, {
+      // The object returned by context is given to all resolvers as their third parameter.
+      // Context is the right place to do things which are shared by multiple resolvers,
+      // like user identification.
+      context: async ({ req, res }) => {
+        const auth = req ? req.headers.authorization : null;
 
-      const currentUser = await User.findById(decodedToken.id);
+        if (auth && auth.startsWith("Bearer ")) {
+          const decodedToken = jwt.verify(
+            auth.substring(7),
+            process.env.JWT_SECRET,
+          );
 
-      return { currentUser };
-    }
-  },
-}).then(({ url }) => {
-  console.log(`Server ready at ${url}`);
-});
+          const currentUser = await User.findById(decodedToken.id);
+
+          return { currentUser };
+        }
+      },
+    }),
+  );
+
+  const PORT = 4000;
+
+  httpServer.listen(PORT, () =>
+    console.log(`Server is now running on http://localhost:${PORT}`),
+  );
+};
+
+start();
