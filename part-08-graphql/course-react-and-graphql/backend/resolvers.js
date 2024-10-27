@@ -14,10 +14,12 @@ const resolvers = {
 
     allPersons: async (root, args) => {
       if (!args.phone) {
-        return Person.find({});
+        return Person.find({}).populate("friendOf");
       }
 
-      return Person.find({ phone: { $exists: args.phone === "YES" } });
+      return Person.find({ phone: { $exists: args.phone === "YES" } }).populate(
+        "friendOf",
+      );
     },
 
     findPerson: async (root, args) => Person.findOne({ name: args.name }),
@@ -33,6 +35,18 @@ const resolvers = {
         street: root.street,
         city: root.city,
       };
+    },
+
+    friendOf: async (root) => {
+      const friends = await User.find({
+        friends: {
+          $in: [root._id],
+        },
+      });
+
+      console.log("User.find");
+
+      return friends;
     },
   },
 
