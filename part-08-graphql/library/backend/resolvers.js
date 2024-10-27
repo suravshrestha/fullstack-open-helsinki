@@ -1,5 +1,8 @@
 const { GraphQLError } = require("graphql");
 
+const { PubSub } = require("graphql-subscriptions");
+const pubsub = new PubSub();
+
 const Book = require("./models/bookModel");
 const Author = require("./models/authorModel");
 
@@ -109,6 +112,12 @@ const resolvers = {
         });
 
         await book.save();
+
+        // Publish a notification about the operation to all subscribers
+        // Sends a WebSocket message about the added book to all the clients
+        // registered in the iterator BOOK_ADDED.
+        pubsub.publish("BOOK_ADDED", { bookAdded: book });
+
         return book.populate("author");
       } catch (error) {
         throw new GraphQLError("Error adding book", {
@@ -154,6 +163,18 @@ const resolvers = {
           },
         });
       }
+    },
+  },
+
+  // The resolver of the `bookAdded` subscription registers and
+  // saves info about all the clients that do the subscription.
+  // The clients are saved to an "iterator object" called BOOK_ADDED
+  //
+  // The iterator name is an arbitrary string, but to follow the convention,
+  // it is the subscription name written in capital letters.
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator("BOOK_ADDED"),
     },
   },
 };
