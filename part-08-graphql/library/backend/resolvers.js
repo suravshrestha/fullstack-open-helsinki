@@ -5,6 +5,7 @@ const pubsub = new PubSub();
 
 const Book = require("./models/bookModel");
 const Author = require("./models/authorModel");
+const User = require("./models/userModel");
 
 const jwt = require("jsonwebtoken");
 
