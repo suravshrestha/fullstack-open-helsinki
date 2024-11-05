@@ -3,6 +3,10 @@ const { expressMiddleware } = require("@apollo/server/express4");
 const {
   ApolloServerPluginDrainHttpServer,
 } = require("@apollo/server/plugin/drainHttpServer");
+const {
+  ApolloServerPluginLandingPageDisabled,
+  ApolloServerPluginLandingPageLocalDefault,
+} = require("@apollo/server/plugin/landingPage/default");
 const { makeExecutableSchema } = require("@graphql-tools/schema");
 const express = require("express");
 const cors = require("cors");
@@ -72,6 +76,10 @@ const start = async () => {
           };
         },
       },
+
+      process.env.NODE_ENV === "production"
+        ? ApolloServerPluginLandingPageDisabled()
+        : ApolloServerPluginLandingPageLocalDefault(),
     ],
   });
 
@@ -91,23 +99,23 @@ const start = async () => {
         if (auth && auth.startsWith("Bearer ")) {
           const decodedToken = jwt.verify(
             auth.substring(7),
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET
           );
 
           const currentUser = await User.findById(decodedToken.id).populate(
-            "friends",
+            "friends"
           );
 
           return { currentUser };
         }
       },
-    }),
+    })
   );
 
   const PORT = process.env.PORT || 4000;
 
   httpServer.listen(PORT, () =>
-    console.log(`Server is now running on http://localhost:${PORT}`),
+    console.log(`Server is now running on http://localhost:${PORT}`)
   );
 };
 
