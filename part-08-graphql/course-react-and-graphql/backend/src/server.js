@@ -9,42 +9,19 @@ const {
 const {
   ApolloServerPluginLandingPageDisabled,
 } = require("@apollo/server/plugin/disabled");
-const { makeExecutableSchema } = require("@graphql-tools/schema");
-const express = require("express");
-const cors = require("cors");
+
 const http = require("http");
 const { WebSocketServer } = require("ws");
 const { useServer } = require("graphql-ws/lib/use/ws");
 
-const jwt = require("jsonwebtoken");
+const express = require("express");
+const cors = require("cors");
 
-const typeDefs = require("./schema");
-const resolvers = require("./resolvers");
-
-const mongoose = require("mongoose");
-mongoose.set("strictQuery", false);
-
-const User = require("./models/userModel");
-
-require("dotenv").config();
-
-const MONGODB_URI = process.env.MONGODB_URI;
-
-console.log("connecting to", MONGODB_URI);
-
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log("connected to MongoDB");
-  })
-  .catch((error) => {
-    console.log("error connection to MongoDB:", error.message);
-  });
-
-mongoose.set("debug", true);
+const schema = require("./graphql/schema");
+const { authenticate } = require("./utils/auth");
 
 // setup is now within a function
-const start = async () => {
+const start = async (port, jwtSecret) => {
   const app = express();
   const httpServer = http.createServer(app);
 
@@ -52,11 +29,6 @@ const start = async () => {
   const wsServer = new WebSocketServer({
     server: httpServer,
     path: "/",
-  });
-
-  const schema = makeExecutableSchema({
-    typeDefs, // GraphQL schema describing types
-    resolvers, // defines how GraphQL queries are responded to
   });
 
   const serverCleanup = useServer({ schema }, wsServer);
@@ -95,30 +67,15 @@ const start = async () => {
       // The object returned by context is given to all resolvers as their third parameter.
       // Context is the right place to do things which are shared by multiple resolvers,
       // like user identification.
-      context: async ({ req, res }) => {
-        const auth = req ? req.headers.authorization : null;
-
-        if (auth && auth.startsWith("Bearer ")) {
-          const decodedToken = jwt.verify(
-            auth.substring(7),
-            process.env.JWT_SECRET
-          );
-
-          const currentUser = await User.findById(decodedToken.id).populate(
-            "friends"
-          );
-
-          return { currentUser };
-        }
-      },
+      context: async ({ req }) => ({
+        currentUser: await authenticate(req.headers.authorization, jwtSecret),
+      }),
     })
   );
 
-  const PORT = process.env.PORT || 4000;
-
-  httpServer.listen(PORT, () =>
-    console.log(`Server is now running on http://localhost:${PORT}`)
-  );
+  httpServer.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
+  });
 };
 
-start();
+module.exports = start;
