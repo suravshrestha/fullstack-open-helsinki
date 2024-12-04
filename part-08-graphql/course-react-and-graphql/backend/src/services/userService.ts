@@ -1,9 +1,9 @@
-const { GraphQLError } = require("graphql");
-const jwt = require("jsonwebtoken");
+import { GraphQLError } from "graphql";
+import jwt from "jsonwebtoken";
+import User, { IUser } from "../models/userModel";
 
-const User = require("../models/userModel");
-
-const createUser = async (userData) => {
+// Create a new user
+const createUser = async (userData: Partial<IUser>): Promise<IUser> => {
   try {
     const user = new User(userData);
 
@@ -15,18 +15,22 @@ const createUser = async (userData) => {
     }
 
     return await user.save();
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError("Failed to create user.", {
       extensions: { code: "DATABASE_ERROR", details: error.message },
     });
   }
 };
 
-const authenticateUser = async (username, password) => {
+// Authenticate user by username and password
+const authenticateUser = async (
+  username: string,
+  password: string
+): Promise<IUser> => {
   try {
     const user = await User.findOne({ username });
 
-    // hard-coded password for simplicity
+    // Hard-coded password for simplicity
     if (!user || password !== "secret") {
       throw new GraphQLError("Invalid username or password.", {
         extensions: { code: "UNAUTHORIZED" },
@@ -34,18 +38,25 @@ const authenticateUser = async (username, password) => {
     }
 
     return user;
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError("Authentication failed.", {
       extensions: { code: "DATABASE_ERROR", details: error.message },
     });
   }
 };
 
-const generateToken = (userForToken) => {
-  return jwt.sign(userForToken, process.env.JWT_SECRET);
+// Generate a JWT token for the user
+const generateToken = (userForToken: object): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET is not defined in environment variables.");
+  }
+
+  return jwt.sign(userForToken, secret);
 };
 
-const findUserByUsername = async (username) => {
+// Find a user by their username
+const findUserByUsername = async (username: string): Promise<IUser> => {
   try {
     const user = await User.findOne({ username });
     if (!user) {
@@ -53,15 +64,17 @@ const findUserByUsername = async (username) => {
         extensions: { code: "NOT_FOUND" },
       });
     }
+
     return user;
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError("Failed to retrieve user by username.", {
       extensions: { code: "DATABASE_ERROR", details: error.message },
     });
   }
 };
 
-const findFriends = async (personId) => {
+// Find friends of a person by personId
+const findFriends = async (personId: string): Promise<IUser[]> => {
   try {
     const friends = await User.find({
       friends: {
@@ -70,7 +83,7 @@ const findFriends = async (personId) => {
     });
 
     return friends;
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError("Failed to fetch friends.", {
       extensions: {
         code: "DATABASE_ERROR",
@@ -80,7 +93,7 @@ const findFriends = async (personId) => {
   }
 };
 
-module.exports = {
+export default {
   createUser,
   authenticateUser,
   generateToken,

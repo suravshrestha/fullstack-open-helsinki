@@ -1,8 +1,9 @@
-const { GraphQLError } = require("graphql");
+import { GraphQLError } from "graphql";
 
-const userService = require("../../services/userService");
+import { IUser } from "../../models/userModel";
+import userService from "../../services/userService";
 
-const typeDef = `
+export const typeDef = `
   extend type Query {
     me: User
   }
@@ -23,9 +24,13 @@ const typeDef = `
   }
 `;
 
-const resolvers = {
+export const resolvers = {
   Query: {
-    me: (_, __, { currentUser }) => {
+    me: (
+      _: unknown,
+      __: unknown,
+      { currentUser }: { currentUser: IUser | null }
+    ): IUser | null => {
       if (!currentUser) {
         throw new GraphQLError("Not authenticated", {
           extensions: { code: "UNAUTHORIZED" },
@@ -37,10 +42,13 @@ const resolvers = {
   },
 
   Mutation: {
-    createUser: async (_, { username }) => {
+    createUser: async (
+      _: unknown,
+      { username }: { username: string }
+    ): Promise<IUser> => {
       try {
         return await userService.createUser({ username });
-      } catch (error) {
+      } catch (error: any) {
         throw new GraphQLError("Failed to create user", {
           extensions: {
             code: "DATABASE_ERROR",
@@ -50,7 +58,10 @@ const resolvers = {
       }
     },
 
-    login: async (_, { username, password }) => {
+    login: async (
+      _: unknown,
+      { username, password }: { username: string; password: string }
+    ): Promise<{ value: string }> => {
       try {
         const user = await userService.authenticateUser(username, password);
         if (!user) {
@@ -61,11 +72,11 @@ const resolvers = {
 
         const userForToken = {
           username: user.username,
-          id: user._id,
+          id: user._id.toString(),
         };
 
         return { value: userService.generateToken(userForToken) };
-      } catch (error) {
+      } catch (error: any) {
         throw new GraphQLError("Login failed", {
           extensions: {
             code: "DATABASE_ERROR",
@@ -77,10 +88,10 @@ const resolvers = {
   },
 
   User: {
-    friends: async (user) => {
+    friends: async (user: IUser): Promise<IUser[]> => {
       try {
-        return await userService.findFriends(user._id);
-      } catch (error) {
+        return await userService.findFriends(user._id as string);
+      } catch (error: any) {
         throw new GraphQLError("Failed to fetch friends", {
           extensions: {
             code: "DATABASE_ERROR",
@@ -91,5 +102,3 @@ const resolvers = {
     },
   },
 };
-
-module.exports = { typeDef, resolvers };

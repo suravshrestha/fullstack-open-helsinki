@@ -1,31 +1,25 @@
-const { ApolloServer } = require("@apollo/server");
-const { expressMiddleware } = require("@apollo/server/express4");
-const {
-  ApolloServerPluginDrainHttpServer,
-} = require("@apollo/server/plugin/drainHttpServer");
-const {
-  ApolloServerPluginLandingPageLocalDefault,
-} = require("@apollo/server/plugin/landingPage/default");
-const {
-  ApolloServerPluginLandingPageDisabled,
-} = require("@apollo/server/plugin/disabled");
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
+import { ApolloServerPluginLandingPageDisabled } from "@apollo/server/plugin/disabled";
 
-const http = require("http");
-const { WebSocketServer } = require("ws");
-const { useServer } = require("graphql-ws/lib/use/ws");
+import http from "http";
+import { WebSocketServer } from "ws";
+import { useServer } from "graphql-ws/lib/use/ws";
 
-const express = require("express");
-const cors = require("cors");
+import express, { Request } from "express";
+import cors from "cors";
 
-const schema = require("./graphql/schema");
-const { authenticate } = require("./utils/auth");
+import schema from "./graphql/schema";
+import { authenticate } from "./utils/auth";
 
-// setup is now within a function
-const start = async (port, jwtSecret) => {
+// Setup function
+const start = async (port: number, jwtSecret: string): Promise<void> => {
   const app = express();
   const httpServer = http.createServer(app);
 
-  // WebSocketServer object to listen the WebSocket connections
+  // WebSocketServer object to listen to WebSocket connections
   const wsServer = new WebSocketServer({
     server: httpServer,
     path: "/",
@@ -61,14 +55,17 @@ const start = async (port, jwtSecret) => {
 
   app.use(
     "/",
-    cors(),
+    cors<Request>(),
     express.json(),
     expressMiddleware(server, {
       // The object returned by context is given to all resolvers as their third parameter.
       // Context is the right place to do things which are shared by multiple resolvers,
       // like user identification.
       context: async ({ req }) => ({
-        currentUser: await authenticate(req.headers.authorization, jwtSecret),
+        currentUser: await authenticate(
+          req.headers.authorization || "",
+          jwtSecret
+        ),
       }),
     })
   );
@@ -78,4 +75,4 @@ const start = async (port, jwtSecret) => {
   });
 };
 
-module.exports = start;
+export default start;

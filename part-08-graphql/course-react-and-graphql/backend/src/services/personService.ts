@@ -1,10 +1,13 @@
-const Person = require("../models/personModel");
-const { GraphQLError } = require("graphql");
+import { GraphQLError } from "graphql";
 
-const getPersonCount = async () => {
+import Person, { IPerson } from "../models/personModel";
+import { IUser } from "../models/userModel";
+
+// Get the count of persons in the database
+const getPersonCount = async (): Promise<number> => {
   try {
     return Person.collection.countDocuments();
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError("Failed to fetch person count.", {
       extensions: {
         code: "DATABASE_ERROR",
@@ -14,7 +17,8 @@ const getPersonCount = async () => {
   }
 };
 
-const getAllPersons = async (phone) => {
+// Get all persons or filter by phone existence
+const getAllPersons = async (phone?: string): Promise<IPerson[]> => {
   try {
     if (!phone) {
       return Person.find({}).populate("friendOf");
@@ -23,7 +27,7 @@ const getAllPersons = async (phone) => {
     return Person.find({ phone: { $exists: phone === "YES" } }).populate(
       "friendOf"
     );
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError("Failed to fetch persons.", {
       extensions: {
         code: "DATABASE_ERROR",
@@ -33,16 +37,19 @@ const getAllPersons = async (phone) => {
   }
 };
 
-const findPersonByName = async (name) => {
+// Find a person by their name
+const findPersonByName = async (name: string): Promise<IPerson> => {
   try {
     const person = await Person.findOne({ name });
 
     if (!person) {
-      throw new ApolloError();
+      throw new GraphQLError("Person not found.", {
+        extensions: { code: "NOT_FOUND" },
+      });
     }
 
     return person;
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError("Failed to find person.", {
       extensions: {
         code: "DATABASE_ERROR",
@@ -52,7 +59,11 @@ const findPersonByName = async (name) => {
   }
 };
 
-const addPerson = async (personData, currentUser) => {
+// Add a new person and associate them with the current user
+const addPerson = async (
+  personData: Partial<IPerson>,
+  currentUser: IUser
+): Promise<IPerson> => {
   try {
     const { name, street, city } = personData;
 
@@ -67,11 +78,11 @@ const addPerson = async (personData, currentUser) => {
     await person.save();
 
     // Add the new person to the current user's friends
-    currentUser.friends.push(person);
+    currentUser.friends.push(person._id as any);
     await currentUser.save();
 
     return person;
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError("Failed to save person to the database", {
       extensions: {
         code: "DATABASE_ERROR",
@@ -81,7 +92,11 @@ const addPerson = async (personData, currentUser) => {
   }
 };
 
-const updatePersonPhone = async (name, phone) => {
+// Update a person's phone number
+const updatePersonPhone = async (
+  name: string,
+  phone: string
+): Promise<IPerson> => {
   try {
     const person = await Person.findOne({ name });
 
@@ -93,7 +108,7 @@ const updatePersonPhone = async (name, phone) => {
 
     person.phone = phone;
     return await person.save();
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError("Failed to update phone number.", {
       extensions: {
         code: "DATABASE_ERROR",
@@ -103,7 +118,7 @@ const updatePersonPhone = async (name, phone) => {
   }
 };
 
-module.exports = {
+export default {
   getPersonCount,
   getAllPersons,
   findPersonByName,
